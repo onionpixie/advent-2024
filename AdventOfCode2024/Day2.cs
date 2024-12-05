@@ -39,52 +39,66 @@ namespace AdventOfCode {
         public string SolveB() {
             var safeCount = 0;
             foreach (var line in Lines) {
-                var levels = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(c => int.Parse(c)).ToArray();
-                var failureTolerated = false;
-                // this wrong come back here
-                var isAscending = levels[0] < levels[1];
-                if (levels[0] == levels[1]) {
-                    failureTolerated = true;
-                    if (levels[1] == levels[2]) continue;
-                    isAscending = levels[1] < levels[2];
-                }
+                var levels = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(c => int.Parse(c)).ToList();
+
+                var isSafe = IsItSafe(levels.ToArray());
                 
-                var isUnsafe = false;
-                for (int i = 1; i < levels.Length; i++) {
-                    if (Math.Abs(levels[i] - levels[i-1]) > 3) {
-                        if (failureTolerated) {
-                            isUnsafe = true;
-                            break;
-                        }
-                        else {
-                            failureTolerated = true;
-                        }
-                    }
 
-                    if (isAscending && levels[i] <= levels[i-1]) {
-                        if (failureTolerated) {
-                            isUnsafe = true;
-                            break;
-                        }
-                        else {
-                            failureTolerated = true;
-                        }
-                    }
-                    else if (!isAscending && levels[i] >= levels[i-1]) {
-                        if (failureTolerated) {
-                            isUnsafe = true;
-                            break;
-                        }
-                        else {
-                            failureTolerated = true;
-                        }
-                    }
+                if (isSafe)
+                { 
+                    safeCount++; 
+                    continue;
                 }
 
-                if (!isUnsafe) safeCount++;
+                for (int i = 1; i < levels.Count; i++)
+                {
+                    // try again without i
+                    var alteredLevels = levels.RemoveAt(i);
+                    isSafe = IsItSafe(alteredLevels.ToArray());
+                    if (isSafe)
+                    { 
+                        safeCount++; 
+                        break;
+                    }
+                }
             }
 
-            return safeCount.ToString();
+            return (Lines.Length - safeCount).ToString();
+        }
+
+        private static bool IsItSafe(int[] levels)
+        {
+            var ascended = false;
+            var descended = false;
+            for (int i = 1; i < levels.Length; i++)
+            {
+                var numberToTest = levels[i];
+                var comparisonNumber = levels[i - 1] ;
+                if (numberToTest == comparisonNumber || Math.Abs(numberToTest - comparisonNumber) > 3) {
+                        return false;
+                }
+
+                if (!ascended && !descended)
+                {
+                    if (numberToTest < comparisonNumber) {
+                        descended = true;
+                        continue;
+                    }
+                    else {
+                        ascended = true;
+                        continue;
+                    }
+                }
+
+                if (ascended && numberToTest <= comparisonNumber) {
+                        return false;
+                }
+                else if (descended && numberToTest >= comparisonNumber) {
+                        return false;
+                }
+            }
+
+            return true;
         }
     }
 }
