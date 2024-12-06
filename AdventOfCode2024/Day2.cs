@@ -39,31 +39,48 @@ namespace AdventOfCode {
         public string SolveB() {
             var safeCount = 0;
             foreach (var line in Lines) {
-                var levels = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(c => int.Parse(c)).ToList();
-
-                var isSafe = IsItSafe(levels.ToArray());
+                var levels = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(c => int.Parse(c)).ToArray();
                 
-
+                var isSafe = IsItSafe(levels);
+                
                 if (isSafe)
                 { 
                     safeCount++; 
                     continue;
                 }
 
-                for (int i = 1; i < levels.Count; i++)
-                {
-                    // try again without i
-                    var alteredLevels = levels.RemoveAt(i);
-                    isSafe = IsItSafe(alteredLevels.ToArray());
+                 for (int i = 0; i < levels.Length; i++)
+                 {
+                     // try again without i
+                    
+                    var result = RemoveOneItem(levels.ToList(), i);
+
+                    isSafe = IsItSafe(result.ToArray());
                     if (isSafe)
                     { 
                         safeCount++; 
                         break;
                     }
-                }
+                 }
             }
 
-            return (Lines.Length - safeCount).ToString();
+            return safeCount.ToString();
+        }
+
+        List<T> RemoveOneItem<T>(List<T> list, int index)
+        {
+            var listCount = list.Count;
+
+            // Create an array to store the data.
+            var result = new T[listCount - 1];
+
+            // Copy element before the index.
+            list.CopyTo(0, result, 0, index);
+
+            // Copy element after the index.
+            list.CopyTo(index + 1, result, index, listCount - 1 - index);
+
+            return new List<T>(result);
         }
 
         private static bool IsItSafe(int[] levels)

@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/AdventOfCode2024/bin/Debug/net7.0/AdventOfCode2024.dll",
+            "program": "${workspaceFolder}/AdventOfCode2024/bin/Debug/net8.0/AdventOfCode2024.dll",
             "args": [],
             "cwd": "${workspaceFolder}/AdventOfCode2024",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
