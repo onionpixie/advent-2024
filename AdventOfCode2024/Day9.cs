@@ -14,45 +14,47 @@ namespace AdventOfCode {
             var id = new List<IdNumber>();
             var count = 0;
             for (int i = 0; i < diskMap.Length; i++) {
-                var newIdNumber = new IdNumber {
-                    isEmpty = i % 2 == 1,
-                    idNumber = count
-                };
+                for (int j = 0; j < diskMap[i]; j++){
+                    var newIdNumber = new IdNumber {
+                        isEmpty = i % 2 == 1,
+                        idNumber = i % 2 == 1 ? null: count % 10
+                    };
+
+                    id.Add(newIdNumber);
+                }
 
                 if (i % 2 == 0) {
                     count++;
                 }
             }
 
-            var output = "";
+            var output = new List<IdNumber>();
             var numberOfTheEnd = id.Count - 1;
              for (int i = 0; i < id.Count; i++) {
-                if (i == numberOfTheEnd) {
-                    output += id[numberOfTheEnd];
-                    break;
-                }
+                if (output.Count > numberOfTheEnd) break;
 
-                if (id[i] != '.') {
-                    output += id[i];
+                if (!id[i].isEmpty) {
+                    id[i].position = i;
+                    output.Add(id[i]);
                     continue;
                 }
 
-                while (idNumberArray[numberOfTheEnd] == '.') {
+                while (id[numberOfTheEnd].isEmpty) {
                     numberOfTheEnd -= 1;
                 }
 
-                output += idNumberArray[numberOfTheEnd];
+                id[numberOfTheEnd].position = i;
+                output.Add(id[numberOfTheEnd]);
                 numberOfTheEnd--;
             }
 
-            Int64 checkSum = 0;
-            var outputArray = output.TrimEnd('.').ToCharArray();
-            for (int i = 0; i < outputArray.Length; i++) {
-                checkSum += (int)Char.GetNumericValue(outputArray[i]) * i;
-            }
-
-            return checkSum.ToString();
+            Int64? total = output.Where(o => !o.isEmpty).Sum(o => o.checkSum);
+            return total.ToString();
             //88957760693
+            //24044850307019
+            //20075802679
+            //5535195185
+            //5534897585
         }
 
         public string SolveB() {
@@ -66,6 +68,10 @@ namespace AdventOfCode {
     class IdNumber(){
         public bool isEmpty {get; set;}
 
-        public int? idNumber {get; set;}
+        public Int64? idNumber {get; set;}
+
+        public int position {get; set;}
+
+        public Int64? checkSum => idNumber.HasValue ? idNumber.Value * position : null;
     }
 }
