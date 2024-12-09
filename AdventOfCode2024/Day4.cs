@@ -25,37 +25,11 @@ namespace AdventOfCode {
 
             }
 
-            
-
-            return sum.ToString();
+            return "";
         }
 
         public string SolveB() {
-            var sum = 0;
-            foreach (var line in Lines)
-            {
-                var combinedPattern = "(do\\(\\)){1}.+?(don't\\(\\)){1}";
-                var combinedExpression = new Regex(combinedPattern);
-                var enabledSections = combinedExpression.Matches(line);
-
-                var numbersPattern = "[1234567890]+";
-                var numbersExpression = new Regex(numbersPattern);
-                var pattern = "m{1}u{1}l{1}\\({1}[1234567890]+\\,{1}[1234567890]+\\){1}";
-                var regexExpression = new Regex(pattern);
-                
-                if (enabledSections.Count == 0) throw new Exception();
-
-                foreach (var section in enabledSections)
-                {
-                    var matches = regexExpression.Matches(section.ToString());
-                    foreach(var match in matches) {
-                        var numbers = numbersExpression.Matches(match.ToString());
-                        sum += int.Parse(numbers[0].ToString()) * int.Parse(numbers[1].ToString());
-                    }
-                }
-            }
-            
-            return sum.ToString();
+            return "";
         }
     }
 }
