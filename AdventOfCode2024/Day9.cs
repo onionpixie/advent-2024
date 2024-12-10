@@ -1,4 +1,6 @@
+using System.Data;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode {
@@ -71,25 +73,36 @@ namespace AdventOfCode {
                     count++;
                 }
             }
+            
+            List<DiskFile> defragedFiles = new List<DiskFile>(files.Count);
 
-            var defragedFiles = new List<DiskFile>();
+            // files.ForEach((item) =>
+            //     {
+            //         defragedFiles.Add((ICloneable)item.Clone());
+            //     });
+
+
             for (int i = 0; i < files.Count; i++) {
                 if (i > files.Count) break;
 
                 var numberOfTheEnd = files.Count - 1;
 
                 if (files[i].idNumber.HasValue){
-                    defragedFiles.Add(files[i]);
+                    defragedFiles.Add((DiskFile)files[i].Clone());
                     continue;
                 }
 
                 var spaceToFill = files[i].size;
                 var numberOfFileToMove = files.Count - 1;
-                var filesToMove = new List<DiskFile>();
                 while (spaceToFill > 0) {
-                    if (files[numberOfFileToMove].idNumber != null && files[numberOfFileToMove].size <= spaceToFill && !filesToMove.Contains(files[numberOfFileToMove])) {
+                    if (numberOfFileToMove < i) {
+                        break;
+                    }
+
+                    if (files[numberOfFileToMove].idNumber != null && files[numberOfFileToMove].size <= spaceToFill) {
                         spaceToFill -= files[numberOfFileToMove].size;
-                        filesToMove.Add(files[numberOfFileToMove]);
+                        defragedFiles.Add((DiskFile)files[numberOfFileToMove].Clone());
+                        files[numberOfFileToMove].idNumber = null;
                         numberOfFileToMove = files.Count - 1;
                     }
                     else {
@@ -97,8 +110,14 @@ namespace AdventOfCode {
                     }
                 }
 
-                defragedFiles.AddRange(filesToMove);
-                files.Except(filesToMove);
+                if (spaceToFill > 0 ) {
+                    defragedFiles.Add(new DiskFile{
+                        idNumber = files[i].idNumber,
+                        size = spaceToFill,
+                    });
+                }
+
+
             }
 
             var position = 0;
@@ -107,8 +126,8 @@ namespace AdventOfCode {
             {
                 for (int i = 0; i < file.size; i++)
                 {
-                    if (file.idNumber.HasValue){
-                    checkSum += position * file.idNumber.Value;
+                    if (file.idNumber.HasValue) {
+                        checkSum += position * file.idNumber.Value;
                     }
                     position++;
                 }
@@ -129,9 +148,21 @@ namespace AdventOfCode {
         public Int64? checkSum => idNumber.HasValue ? idNumber.Value * position : null;
     }
 
-    class DiskFile(){
+    class DiskFile() : ICloneable {
          public Int64? idNumber {get; set;}
 
          public int size{get; set;}
+
+         public bool isMoved {get; set; }
+
+         public object Clone()
+      {
+         // setup
+    var json = JsonSerializer.Serialize(this);
+
+            // get
+            return JsonSerializer.Deserialize<DiskFile>(json);
+      }
+         
     }
 }
