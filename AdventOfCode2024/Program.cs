@@ -6,7 +6,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            var day = 9;
+            var day = 4;
             IDay dayClass;
             switch (day){
                 case 1:
