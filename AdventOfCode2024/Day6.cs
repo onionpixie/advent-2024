@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace AdventOfCode {
     public class Day6 : IDay {
@@ -135,6 +135,7 @@ namespace AdventOfCode {
             }
 
             var current = new Coordinates (0, 0);
+             var start = new Coordinates (0, 0);
             var found = false;
             var maxY = array.Length-1;
             var maxX = array[0].Length-1;
@@ -147,17 +148,16 @@ namespace AdventOfCode {
                     if (array[i][j] != '^') continue;
 
                     current = new Coordinates(j, i, Direction.Up);
+                    start = new Coordinates(j, i, Direction.Up);
                     found = true;
                     break;
                 }
 
                 if (found) break;
             }
-            var start = current;
-            var uniqueVisitedPoints = new List<Coordinates> { current };
-            var allPoints = new List<Coordinates> { current };
-            var exited = false;
 
+            var uniqueVisitedPoints = new List<Coordinates> { current };
+            var exited = false;
             while (current.Y >= 0 && current.Y <= maxY && current.X >= 0 && current.X <= maxX && !exited) {
                 switch(current.Direction) {
                     case Direction.Up:
@@ -170,12 +170,10 @@ namespace AdventOfCode {
                             if (!uniqueVisitedPoints.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y)) {
                                 uniqueVisitedPoints.Add(nextSpace);
                             }
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                         else{
                             var nextSpace = new Coordinates(current.X, current.Y, Direction.Right);
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                     break;
@@ -189,12 +187,10 @@ namespace AdventOfCode {
                             if (!uniqueVisitedPoints.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y)) {
                                 uniqueVisitedPoints.Add(nextSpace);
                             }
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                         else{
                             var nextSpace = new Coordinates(current.X, current.Y, Direction.Left);
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                     break;
@@ -208,12 +204,10 @@ namespace AdventOfCode {
                             if (!uniqueVisitedPoints.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y)) {
                                 uniqueVisitedPoints.Add(nextSpace);
                             }
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                         else{
                             var nextSpace = new Coordinates(current.X, current.Y, Direction.Up);
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                     break;
@@ -227,104 +221,129 @@ namespace AdventOfCode {
                             if (!uniqueVisitedPoints.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y)) {
                                 uniqueVisitedPoints.Add(nextSpace);
                             }
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                         else{
                             var nextSpace = new Coordinates(current.X, current.Y, Direction.Down);
-                            allPoints.Add(nextSpace);
                             current = nextSpace;
                         }
                     break;
                 }
             }
 
+            var sw = new Stopwatch();
+            sw.Start();
             var loops = 0;
             for (int i = 0; i < uniqueVisitedPoints.Count; i++) {
                 if (uniqueVisitedPoints[i].X == start.X && uniqueVisitedPoints[i].Y == start.Y) continue;
-
-                exited = false;
-                var looped = false;
+                if (i % 25 == 0) 
+                    Console.WriteLine($"Running {i}/{uniqueVisitedPoints.Count}. Time taken: {sw.ElapsedMilliseconds / 1000}s, ~{(uniqueVisitedPoints.Count - i) * (sw.ElapsedMilliseconds / i) * 0.001:N0}s to go");
+                var finished = false;
                 current = start;
                 var haveIBeenHereBefore = new List<Coordinates>() { current };
-                while (current.Y >= 0 && current.Y <= maxY && current.X >= 0 && current.X <= maxX && !exited && !looped) {
-                    switch(current.Direction) {
-                    case Direction.Up:
-                       if (current.Y == 0){ 
-                            exited = true; 
-                            continue;
-                        }
-                        var nextSpace = new Coordinates(current.X, current.Y - 1, Direction.Up);
-                        if (array[current.Y - 1][current.X] == '#' || (uniqueVisitedPoints[i].X != nextSpace.X && uniqueVisitedPoints[i].Y != nextSpace.Y)){
-                            nextSpace.Direction = Direction.Right;
-                            nextSpace.Y = current.Y;
-                        }
-                        if (haveIBeenHereBefore.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y && c.Direction == nextSpace.Direction)){
-                            loops += 1;
-                            looped = true;
-                            continue;
-                        }
-                        current = nextSpace;
-                    break;
-                    case Direction.Down:
-                        if (current.Y == maxY){ 
-                            exited = true; 
-                            continue;
-                        }
-                        nextSpace = new Coordinates(current.X, current.Y + 1, Direction.Down);
-                        if (array[current.Y + 1][current.X] == '#' || (uniqueVisitedPoints[i].X != nextSpace.X && uniqueVisitedPoints[i].Y != nextSpace.Y)){
-                            nextSpace.Direction = Direction.Left;
-                            nextSpace.Y = current.Y;
-                        }
-
-                        if (haveIBeenHereBefore.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y && c.Direction == nextSpace.Direction)){
-                            loops += 1;
-                            looped = true;
-                            continue;
-                        }
-                        current = nextSpace;
-                    break;
-                    case Direction.Left:
-                        if (current.X == 0){ 
-                            exited = true; 
-                            continue;
-                        }
-                        nextSpace = new Coordinates(current.X - 1, current.Y, Direction.Left);
-                        if (array[current.Y][current.X + 1] == '#' || (uniqueVisitedPoints[i].X != nextSpace.X && uniqueVisitedPoints[i].Y != nextSpace.Y)){
-                            nextSpace.Direction = Direction.Up;
-                            nextSpace.X = current.X;
-                        }
-
-                        if (haveIBeenHereBefore.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y && c.Direction == nextSpace.Direction)){
-                                loops += 1;
-                                looped = true;
+                while (current.Y >= 0 && current.Y <= maxY && current.X >= 0 && current.X <= maxX && !finished)
+                {
+                    switch (current.Direction)
+                    {
+                        case Direction.Up:
+                            if (current.Y == 0)
+                            {
+                                finished = true;
                                 continue;
                             }
-                        current = nextSpace;
-                    break;
-                    case Direction.Right:
-                        if (current.X == maxX){ 
-                            exited = true; 
-                            continue;
-                        }
-                        nextSpace = new Coordinates(current.X + 1, current.Y, Direction.Right);
-                        if (array[current.Y][current.X + 1] == '#' || (uniqueVisitedPoints[i].X != nextSpace.X && uniqueVisitedPoints[i].Y != nextSpace.Y)){
-                            nextSpace.Direction = Direction.Down;
-                            nextSpace.X = current.X;
-                        }
 
-                        if (haveIBeenHereBefore.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y && c.Direction == nextSpace.Direction)){
+                            var nextSpace = new Coordinates(current.X, current.Y - 1, Direction.Up);
+                            if (IsNextSpaceBlocked(array, uniqueVisitedPoints[i], nextSpace)) {
+                                nextSpace.Direction = Direction.Right;
+                                nextSpace.Y = current.Y;
+                            }
+
+                            if (CheckForLoop(haveIBeenHereBefore, nextSpace)){
                                 loops += 1;
-                                looped = true;
+                                finished = true;
+                                continue;
+                            }
+
+                            current = nextSpace;
+                            haveIBeenHereBefore.Add(nextSpace);
+                            break;
+                        case Direction.Down:
+                            if (current.Y == maxY)
+                            {
+                                finished = true;
+                                continue;
+                            }
+                            nextSpace = new Coordinates(current.X, current.Y + 1, Direction.Down);
+                            if (IsNextSpaceBlocked(array, uniqueVisitedPoints[i], nextSpace)) {
+                                nextSpace.Direction = Direction.Left;
+                                nextSpace.Y = current.Y;
+                            }
+
+                            if (CheckForLoop(haveIBeenHereBefore, nextSpace))
+                            {
+                                loops += 1;
+                                finished = true;
                                 continue;
                             }
                             current = nextSpace;
-                    break;
+                            haveIBeenHereBefore.Add(nextSpace);
+                            break;
+                        case Direction.Left:
+                            if (current.X == 0) {
+                                finished = true;
+                                continue;
+                            }
+                            nextSpace = new Coordinates(current.X - 1, current.Y, Direction.Left);
+                            if (IsNextSpaceBlocked(array, uniqueVisitedPoints[i], nextSpace)) {
+                                nextSpace.Direction = Direction.Up;
+                                nextSpace.X = current.X;
+                            }
+
+                            if (CheckForLoop(haveIBeenHereBefore, nextSpace))
+                            {
+                                loops += 1;
+                                finished = true;
+                                continue;
+                            }
+                            current = nextSpace;
+                            haveIBeenHereBefore.Add(nextSpace);
+                            break;
+                        case Direction.Right:
+                            if (current.X == maxX) {
+                                finished = true;
+                                continue;
+                            }
+
+                            nextSpace = new Coordinates(current.X + 1, current.Y, Direction.Right);
+                            if (IsNextSpaceBlocked(array, uniqueVisitedPoints[i], nextSpace)) {
+                                nextSpace.Direction = Direction.Down;
+                                nextSpace.X = current.X;
+                            }
+
+                            if (CheckForLoop(haveIBeenHereBefore, nextSpace)) {
+                                loops += 1;
+                                finished = true;
+                                continue;
+                            }
+
+                            current = nextSpace;
+                            haveIBeenHereBefore.Add(nextSpace);
+                            break;
+                    }
                 }
-            }
             }
 
            return loops.ToString();
+        }
+
+        private static bool IsNextSpaceBlocked(char[][] array, Coordinates testingBlock, Coordinates nextSpace)
+        {
+            return array[nextSpace.Y][nextSpace.X] == '#' || (testingBlock.X == nextSpace.X && testingBlock.Y == nextSpace.Y);
+        }
+
+        private static bool CheckForLoop(List<Coordinates> haveIBeenHereBefore, Coordinates nextSpace)
+        {
+            return haveIBeenHereBefore.Any(c => c.X == nextSpace.X && c.Y == nextSpace.Y && c.Direction == nextSpace.Direction);
         }
     }
 
