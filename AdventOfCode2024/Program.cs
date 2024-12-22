@@ -24,9 +24,9 @@ namespace AdventOfCode
                 case 5:
                     dayClass = new Day5();
                     break;
-                // case 6:
-                //     dayClass = new Day6();
-                //     break;
+                case 6:
+                    dayClass = new Day6();
+                    break;
                 // case 7:
                 //     dayClass = new Day7();
                 //     break;
